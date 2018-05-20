@@ -5,7 +5,9 @@ import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
 import org.larrychina.lcm.conf.LcmConfigration;
+import org.larrychina.lcm.exception.LcmException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,15 +19,28 @@ public class LcmClentImpl implements LcmClient {
 
     private Map<String,LcmClient> clientMap = new ConcurrentHashMap() ;
 
+    private CuratorFramework client ;
+
     protected LcmClentImpl(LcmConfigration configration){
         // 重试策略，超时时间1000ms,重试次数为10次
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000,10) ;
-        CuratorFramework client = CuratorFrameworkFactory.newClient(configration.getZkServer(), retryPolicy) ;
+        this.client = CuratorFrameworkFactory.newClient(configration.getZkServer(), retryPolicy) ;
         client.start();
 
     }
+
     @Override
     public void destory() {
-
+        if(this.client == null){
+            this.client.close();
+        }
     }
+
+    @Override
+    public void createPathData(String path, String data) throws Exception {
+        this.client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path,data.getBytes());
+    }
+
+
+
 }

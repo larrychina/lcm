@@ -7,4 +7,7 @@ public interface LcmClient {
 
     void destory() ;
 
-}
+    void createPathData(String path,String data) throws Exception;
+ }
+
+

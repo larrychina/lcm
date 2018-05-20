@@ -6,6 +6,7 @@ import org.larrychina.lcm.exception.LcmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -35,17 +36,24 @@ public class LcmClientAbstactFactory {
             return lcmClient ;
         }
         try {
-            lock.lock();
-            LcmClient lcmClientObj = clientMap.get(fileConfigPath);
-            if(lcmClientObj == null){
+            lock.tryLock(1000, TimeUnit.MILLISECONDS) ;
+            lcmClient = clientMap.get(fileConfigPath);
+            if(lcmClient == null){
                 LcmConfigration instance = LcmConfigration.getInstance(fileConfigPath);
-                lcmClientObj = new LcmClentImpl(instance);
-                clientMap.putIfAbsent(fileConfigPath,lcmClientObj) ;
+                lcmClient = new LcmClentImpl(instance);
+                clientMap.putIfAbsent(fileConfigPath,lcmClient) ;
             }
-            return lcmClientObj ;
-        }finally {
+            return lcmClient ;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
             lock.unlock();
         }
-
+        if(lcmClient == null){
+            throw new LcmException("lcmClient is null....") ;
+        }
+        return lcmClient ;
     }
+
+
 }
