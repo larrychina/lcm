@@ -6,6 +6,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.larrychina.lcm.conf.LcmConfigration;
 import org.larrychina.lcm.exception.LcmException;
 
@@ -25,7 +26,6 @@ public class LcmClentImpl implements LcmClient {
         // 重试策略，超时时间1000ms,重试次数为10次
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000,10) ;
         this.client = CuratorFrameworkFactory.newClient(configration.getZkServer(), retryPolicy) ;
-        client.start();
 
     }
 
@@ -38,9 +38,19 @@ public class LcmClentImpl implements LcmClient {
 
     @Override
     public void createPathData(String path, String data) throws Exception {
-        this.client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path,data.getBytes());
+        client.start();
+        client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path,data.getBytes());
+        client.close();
     }
 
+    @Override
+    public void setPathData(String path, String data) throws Exception {
+        client.start();
+        if(this.client.checkExists().forPath(path)== null)
+            createPathData(path,data);
+        client.setData().forPath(path,data.getBytes()) ;
+        client.close();
+    }
 
 
 }
