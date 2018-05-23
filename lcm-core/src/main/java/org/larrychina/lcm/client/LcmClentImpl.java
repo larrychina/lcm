@@ -1,14 +1,11 @@
 package org.larrychina.lcm.client;
 
 import org.apache.curator.RetryPolicy;
-import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 import org.larrychina.lcm.conf.LcmConfigration;
-import org.larrychina.lcm.exception.LcmException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,5 +49,20 @@ public class LcmClentImpl implements LcmClient {
         client.close();
     }
 
+    @Override
+    public void deletePathData(String path,String data) throws Exception{
+        client.start();
+        client.delete().forPath(path) ;
+        client.close();
+    }
+    @Override
+    public String getPathData(String path) throws Exception{
+        client.start();
+        try {
+            return new String(client.getData().forPath(path)) ;
+        }finally {
+            client.close();
+        }
+    }
 
 }

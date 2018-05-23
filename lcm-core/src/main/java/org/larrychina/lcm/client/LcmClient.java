@@ -12,6 +12,10 @@ public interface LcmClient {
     void createPathData(String path,String data) throws Exception;
 
     void setPathData(String path ,String data) throws Exception ;
+
+    public void deletePathData(String path,String data) throws Exception;
+
+    public String getPathData(String path) throws Exception;
  }
 
 
