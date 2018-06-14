@@ -1,7 +1,5 @@
 package org.larrychina.lcm.client;
 
-import org.larrychina.lcm.exception.LcmException;
-
 /**
  * Created by suning on 2018/5/16.
  */

@@ -43,17 +43,21 @@ public class LcmClentImpl implements LcmClient {
     @Override
     public void setPathData(String path, String data) throws Exception {
         client.start();
-        if(this.client.checkExists().forPath(path)== null)
+        if(this.client.checkExists().forPath(path)== null){
             createPathData(path,data);
+        }
         client.setData().forPath(path,data.getBytes()) ;
         client.close();
     }
 
     @Override
     public void deletePathData(String path,String data) throws Exception{
-        client.start();
-        client.delete().forPath(path) ;
-        client.close();
+        try {
+            client.start();
+            client.delete().forPath(path) ;
+        }finally {
+            client.close();
+        }
     }
     @Override
     public String getPathData(String path) throws Exception{
